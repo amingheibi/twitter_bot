@@ -24,7 +24,7 @@ def get_headers():
     return headers
 
 def main():
-    response = requests.get(endpoint_url(),params=get_params('artificial intelligence'),headers=get_headers())
+    response = requests.get(endpoint_url(),params=get_params('هوش مصنوعی'),headers=get_headers())
     if response.status_code !=200:
         print(response.status_code)
         print(response.text)
@@ -32,9 +32,12 @@ def main():
         # print(json.dumps(response.json(), indent=4, sort_keys=True))
         with open('recent_tweets.csv','w', newline='', encoding="utf-8") as csvfile:
             csvw = csv.writer(csvfile)
-            csvw.writerow(['tweet_id','author_id','text','entities'])
+            # csvw.writerow(['tweet_id','author_id','text','entities'])
+            csvw.writerow(['tweet_id','text']) #simplify tweet for readablity
             for item in response.json()['data']:
-                csvw.writerow([item['id'],item['author_id'],item['text'],json.dumps(item.get('entities','N/A'))])
+                # csvw.writerow([item['id'],item['author_id'],item['text'],json.dumps(item.get('entities','N/A'))])
+                csvw.writerow([item['id'],item['text']])
+
 
 if __name__ == "__main__":
     main()
