@@ -2,3 +2,5 @@ setting.py
 .vscode/
 .venv/
 __pycache__/
+test.py
+recent_tweets.csv
