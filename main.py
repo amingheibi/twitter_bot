@@ -21,19 +21,29 @@ def get_params(query):
     return params
 
 
-def get_headers():
+def get_twitter_headers():
     # authorization: Bearer $BEARER_TOKEN'
     headers = {'authorization': 'Bearer {}'.format(setting.BEARER_TOKEN)}
     return headers
 
 
-def main():
-    response = requests.get(endpoint_url(), params=get_params(
-        'هوش مصنوعی'), headers=get_headers())
+def get_slack_headers():
+    headers = {'Content-type': 'application/json'}
+    return headers
+
+
+def check_response(response):
     if response.status_code != 200:
         print(response.status_code)
         print(response.text)
-    else:
+        return 1
+    return 0
+
+
+def main():
+    response = requests.get(endpoint_url(), params=get_params(
+        'هوش مصنوعی'), headers=get_twitter_headers())
+    if check_response(response) == 0:
         # print(json.dumps(response.json(), indent=4, sort_keys=True))
         with open('recent_tweets.csv', 'w', newline='', encoding="utf-8") as csvfile:
             csvw = csv.writer(csvfile)
@@ -43,6 +53,13 @@ def main():
             for item in response.json()['data']:
                 # csvw.writerow([item['id'],item['author_id'],item['text'],json.dumps(item.get('entities','N/A'))])
                 csvw.writerow([item['id'], item['text']])
+                # post to slack (the username in the link is not important, the id matters)
+                tweet_link = "https://twitter.com/AminGheibi/status/{}".format(
+                    item['id'])
+                response = requests.post(url=setting.WEBHOOK,
+                                         headers=get_slack_headers(),
+                                         data=json.dumps({"text": tweet_link}))
+                check_response(response)
 
 
 if __name__ == "__main__":
