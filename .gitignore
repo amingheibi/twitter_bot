@@ -4,3 +4,4 @@ setting.py
 __pycache__/
 test.py
 recent_tweets.csv
+keywords.txt

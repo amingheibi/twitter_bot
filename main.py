@@ -40,26 +40,35 @@ def check_response(response):
     return 0
 
 
+def get_keywords():
+    lines = []
+    with open('keywords.txt', 'r', encoding='utf-8') as input_file:
+        lines = input_file.read().splitlines()
+    return lines
+
+
 def main():
-    response = requests.get(endpoint_url(), params=get_params(
-        'هوش مصنوعی'), headers=get_twitter_headers())
-    if check_response(response) == 0:
-        # print(json.dumps(response.json(), indent=4, sort_keys=True))
-        with open('recent_tweets.csv', 'w', newline='', encoding="utf-8") as csvfile:
-            csvw = csv.writer(csvfile)
-            # csvw.writerow(['tweet_id','author_id','text','entities'])
-            # simplify tweet for readablity
-            csvw.writerow(['tweet_id', 'text'])
-            for item in response.json()['data']:
-                # csvw.writerow([item['id'],item['author_id'],item['text'],json.dumps(item.get('entities','N/A'))])
-                csvw.writerow([item['id'], item['text']])
-                # post to slack (the username in the link is not important, the id matters)
-                tweet_link = "https://twitter.com/AminGheibi/status/{}".format(
-                    item['id'])
-                response = requests.post(url=setting.WEBHOOK,
-                                         headers=get_slack_headers(),
-                                         data=json.dumps({"text": tweet_link}))
-                check_response(response)
+    keywords = get_keywords()
+    for keyword in keywords:
+        response = requests.get(endpoint_url(), params=get_params(
+            keyword), headers=get_twitter_headers())
+        if check_response(response) == 0:
+            # print(json.dumps(response.json(), indent=4, sort_keys=True))
+            with open('recent_tweets.csv', 'w', newline='', encoding="utf-8") as csvfile:
+                csvw = csv.writer(csvfile)
+                # csvw.writerow(['tweet_id','author_id','text','entities'])
+                # simplify tweet for readablity
+                csvw.writerow(['tweet_id', 'text'])
+                for item in response.json()['data']:
+                    # csvw.writerow([item['id'],item['author_id'],item['text'],json.dumps(item.get('entities','N/A'))])
+                    csvw.writerow([item['id'], item['text']])
+                    # post to slack (the username in the link is not important, the id matters)
+                    tweet_link = "https://twitter.com/AminGheibi/status/{}".format(
+                        item['id'])
+                    response = requests.post(url=setting.WEBHOOK,
+                                             headers=get_slack_headers(),
+                                             data=json.dumps({"text": tweet_link}))
+                    check_response(response)
 
 
 if __name__ == "__main__":
