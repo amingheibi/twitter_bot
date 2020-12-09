@@ -1,6 +1,6 @@
 import requests
 import json
-from utils import check_response
+from .utils import check_response
 
 
 def get_slack_headers():
